@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
+﻿using System.Text;
 
 namespace MyApp // Note: actual namespace depends on the project name.
 {
@@ -235,6 +232,9 @@ namespace MyApp // Note: actual namespace depends on the project name.
 
             return upd.ToString();
         }
+
+
+
         /// <summary>
         /// Стоит прописать код для определения есть ли уникальный ключ в БД для этой таблицы
         /// ТАКЖЕ ДОБАВИТЬ СКРИПТЕР ДЛЯ ПЕРЕВОДА ТИПОВ В CONSTRAINT
