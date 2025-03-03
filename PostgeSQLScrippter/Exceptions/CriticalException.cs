@@ -1,11 +1,4 @@
-﻿using Org.BouncyCastle.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SqlScrippter.Exceptions
+﻿namespace SqlScrippter.Exceptions
 {
     public class CriticalException : Exception
     {
@@ -44,15 +37,15 @@ namespace SqlScrippter.Exceptions
         }
         public async Task TriggerFailFastAfterDelayAsync(int delayMilliseconds)
         {
-            await Task.Delay(delayMilliseconds); 
+            await Task.Delay(delayMilliseconds);
             Environment.FailFast(ErrorMessage);
         }
         public async Task WaitForNotificationAsync(string message)
         {
             await _tcs.Task;
-            if(!string.IsNullOrWhiteSpace(message))
+            if (!string.IsNullOrWhiteSpace(message))
                 Console.WriteLine($"Critical mistake {this.GetType()}, message: {message}");
-            Environment.FailFast(ErrorMessage); 
+            Environment.FailFast(ErrorMessage);
         }
     }
 }

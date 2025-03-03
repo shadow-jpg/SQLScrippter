@@ -24,11 +24,11 @@ namespace SqlScrippter.supporters
             int depth = int.Parse(config["AppSettings:SearchDepth"]);
             FindConfigFiles();
         }
-        public string FindConfigFiles( string searchPattern = "config.*")
+        public string FindConfigFiles(string searchPattern = "config.*")
         {
             for (int i = 0; i < depth; i++)
             {
-                checkedFile= configFile;
+                checkedFile = configFile;
                 configFile = Directory.GetParent(configFile).FullName;
 
 
@@ -37,7 +37,7 @@ namespace SqlScrippter.supporters
                     throw new DirectoryNotFoundException($"Директория не найдена: {configFile}");
                 }
 
-                if(SearchDirectory(configFile, searchPattern, checkedFile))
+                if (SearchDirectory(configFile, searchPattern, checkedFile))
                     return configFile;
             }
             throw new NoAppsetingException(depth);

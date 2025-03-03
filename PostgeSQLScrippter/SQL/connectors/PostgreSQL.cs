@@ -2,7 +2,7 @@
 
 namespace SqlScrippter.SQL.connectors
 {
-    internal class PostgreSQL
+    internal class PostgreSQL : SqlConnector
     {
         private readonly string _connectionString;
 
@@ -10,7 +10,7 @@ namespace SqlScrippter.SQL.connectors
         {
             _connectionString = connectionString;
         }
-        public int ExecuteNonQuery(string sql)
+        public override int ExecuteNonQuery(string sql)
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -22,7 +22,7 @@ namespace SqlScrippter.SQL.connectors
             }
         }
 
-        public List<Dictionary<string, object>> ExecuteQuery(string sql)
+        public override List<Dictionary<string, object>> ExecuteQuery(string sql)
         {
             var result = new List<Dictionary<string, object>>();
 
@@ -47,7 +47,7 @@ namespace SqlScrippter.SQL.connectors
             return result;
         }
 
-        public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> parameters)
+        public override int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> parameters)
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -63,7 +63,7 @@ namespace SqlScrippter.SQL.connectors
             }
         }
 
-        public List<Dictionary<string, object>> ExecuteQueryWithParameters(string sql, Dictionary<string, object> parameters)
+        public override List<Dictionary<string, object>> ExecuteQueryWithParameters(string sql, Dictionary<string, object> parameters)
         {
             var result = new List<Dictionary<string, object>>();
 

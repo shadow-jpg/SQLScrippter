@@ -59,5 +59,14 @@ namespace SqlScrippter.properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Обнаружена необработанная критическая ошибка в ORM. Завершение работы приложения....
+        /// </summary>
+        internal static string CriticalError {
+            get {
+                return ResourceManager.GetString("CriticalError", resourceCulture);
+            }
+        }
     }
 }

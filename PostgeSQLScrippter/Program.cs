@@ -1,11 +1,9 @@
-﻿using System.Globalization;
-using System.Resources;
-using System.Text;
-using Microsoft.Extensions.Configuration;
-using Org.BouncyCastle.Utilities;
+﻿using Microsoft.Extensions.Configuration;
 using SqlScrippter.Exceptions;
 using SqlScrippter.SQL;
 using SqlScrippter.SQL.scriptures;
+using System.Globalization;
+using System.Resources;
 namespace MyApp // Note: actual namespace depends on the project name.
 {
     /// <summary>
@@ -20,10 +18,15 @@ namespace MyApp // Note: actual namespace depends on the project name.
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             IConfiguration configJson = builder.Build();
-            bool criticalErrorIsNecessary = bool.Parse(configJson["AppSettings:criticalErrorIsNecessary"]);
+            if (!bool.TryParse(configJson["AppSettings:criticalErrorIsNecessary"], out bool criticalErrorIsNecessary))
+            {
+                var frame = st.GetFrame(0);
+                int line = frame.GetFileLineNumber();
+                Console.WriteLine(ResourceManager.GetString("NoDataInJSON") + "main class. line:" + line);
+            }
 
             // установка языка
-            string languageForComments = string.IsNullOrWhiteSpace( configJson["AppSettings:language"]) ? "english":  configJson["AppSettings:language"].ToLower();
+            string languageForComments = string.IsNullOrWhiteSpace(configJson["AppSettings:language"]) ? "english" : configJson["AppSettings:language"].ToLower();
             SetLanguage(languageForComments);
 
             //все критические ошибки валят библиотеку по умолчанию
@@ -32,7 +35,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 {
                     if (args.ExceptionObject is CriticalException ex)
                     {
-                        Console.WriteLine(ResourceManager.GetString("CriticalError"));                        
+                        Console.WriteLine(ResourceManager.GetString("CriticalError"));
 
                         //Валим всю прогу
                         Environment.FailFast(ex.ErrorMessage, ex);
@@ -87,7 +90,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     type = config.doubles;
                 else if (Console.ReadLine().Contains("i"))
                     type = config.ints;
-             
+
 
                 string foreignTable = "";
                 if (Console.ReadLine().Contains("f"))
@@ -148,7 +151,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
             }
             Console.WriteLine(PotgreSricpt.Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
             Console.WriteLine(PotgreSricpt.Upsert("source_temp", result_table, uq_Key, update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn, constraint));
-            
+
             return 0;
         }
         private static void SetLanguage(string language)

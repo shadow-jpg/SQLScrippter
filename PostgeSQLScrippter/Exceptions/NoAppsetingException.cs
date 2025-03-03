@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SqlScrippter.Exceptions
+﻿namespace SqlScrippter.Exceptions
 {
-    class NoAppsetingException:CriticalException
+    class NoAppsetingException : CriticalException
     {
         public override string ErrorMessage { get; } = "File with configuration not found!";
         int depth;
 
-        public NoAppsetingException():base()
+        public NoAppsetingException() : base()
         {
 
         }
@@ -19,7 +13,7 @@ namespace SqlScrippter.Exceptions
         {
             this.depth = depth;
         }
-        public NoAppsetingException(string message,int depth) : base(message)
+        public NoAppsetingException(string message, int depth) : base(message)
         {
             this.depth = depth;
         }
