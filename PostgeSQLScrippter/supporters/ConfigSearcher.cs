@@ -1,60 +1,74 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Extensions.Configuration;
+using SqlScrippter.Exceptions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SqlScrippter
+namespace SqlScrippter.supporters
 {
     internal class ConfigSearcher
     {
-        string configFile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); // Current location of library
-        public ConfigSearcher() { }
-
-        public List<string> FindConfigFiles(string directoryPath, string searchPattern = "config.*")
+        private string configFile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private int depth;
+        private string checkedFile;
+        public ConfigSearcher()
         {
-            var configFiles = new List<string>();
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            IConfiguration config = builder.Build();
 
-            // Проверяем, существует ли директория
-            if (!Directory.Exists(directoryPath))
+            int depth = int.Parse(config["AppSettings:SearchDepth"]);
+            FindConfigFiles();
+        }
+        public ConfigSearcher(IConfiguration config)
+        {
+            int depth = int.Parse(config["AppSettings:SearchDepth"]);
+            FindConfigFiles();
+        }
+        public string FindConfigFiles( string searchPattern = "config.*")
+        {
+            for (int i = 0; i < depth; i++)
             {
-                throw new DirectoryNotFoundException($"Директория не найдена: {directoryPath}");
+                checkedFile= configFile;
+                configFile = Directory.GetParent(configFile).FullName;
+
+
+                if (!Directory.Exists(configFile))
+                {
+                    throw new DirectoryNotFoundException($"Директория не найдена: {configFile}");
+                }
+
+                if(SearchDirectory(configFile, searchPattern, checkedFile))
+                    return configFile;
             }
-
-            // Рекурсивно ищем файлы по шаблону
-            SearchDirectory(directoryPath, searchPattern, configFiles);
-
-            return configFiles;
+            throw new NoAppsetingException(depth);
         }
 
-        // Вспомогательный метод для рекурсивного поиска
-        private void SearchDirectory(string directoryPath, string searchPattern, List<string> configFiles)
+        private bool SearchDirectory(string directoryPath, string searchPattern, string checkedFile)
         {
             try
             {
-                // Ищем файлы по шаблону в текущей директории
                 foreach (var file in Directory.GetFiles(directoryPath, searchPattern))
                 {
-                    configFiles.Add(file);
+                    configFile = file;
+                    return true;
                 }
 
-                // Рекурсивно ищем в поддиректориях
                 foreach (var subDirectory in Directory.GetDirectories(directoryPath))
                 {
-                    SearchDirectory(subDirectory, searchPattern, configFiles);
+                    if (subDirectory != checkedFile && SearchDirectory(subDirectory, searchPattern, checkedFile))
+                        return true;
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                // Обработка ошибок доступа (например, если нет прав на чтение директории)
                 Console.WriteLine($"Нет доступа к директории: {directoryPath}");
             }
             catch (Exception ex)
             {
-                // Обработка других исключений
                 Console.WriteLine($"Ошибка при поиске в директории {directoryPath}: {ex.Message}");
             }
+
+            return false;
         }
     }
 }

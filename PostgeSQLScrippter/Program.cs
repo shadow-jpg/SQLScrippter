@@ -1,71 +1,50 @@
-﻿using System.Text;
-
+﻿using System.Globalization;
+using System.Resources;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Utilities;
+using SqlScrippter.Exceptions;
+using SqlScrippter.SQL;
+using SqlScrippter.SQL.scriptures;
 namespace MyApp // Note: actual namespace depends on the project name.
 {
+    /// <summary>
+    /// criticalErrorIsNecessary = true because handling  for fatal errors of ORM
+    /// </summary>
     class Program
     {
-        public struct Configuration
-        {
-            public string timezones = "time stamp wihtout time zone";
-            public string doubles = "double precision";
-            public string ints = "bigint";
-            public string ids = "bigint";
-            public string chars = "character varyiyng";
-
-            public Configuration() { }
-            public Configuration(string timezones, string doubles, string ints, string ids, string chars)
-            {
-
-                this.timezones = timezones;
-                this.doubles = doubles;
-                this.ints = ints;
-                this.ids = ids;
-                this.chars = chars;
-
-            }
-        }
-        public struct UpdateType
-        {
-            public UpdateType()
-            {
-            }
-            private int noData = -1;
-            private int none = 0;
-            private int update = 1;
-            private int withDictionary = 2;
-
-            public int NoData { get => noData; }
-            public int None { get => none;  }
-            public int Update { get => update;  }
-            public int WithDictionary { get => withDictionary; }
-        }
-
-        public struct Types
-        {
-            public Types()
-            {
-            }
-            public Types(string type, string name, bool isForeign, string table)
-            {
-                this.type = type;
-                this.name = name;
-                this.isForeign = isForeign;
-                this.table = table;
-            }
-            private string type;
-            private string name;
-            private bool isForeign;
-            private string table;
-            public string Type { get => type; }
-            public string Name { get => name; }
-            public bool IsForeign { get => isForeign; }
-            public string Table { get => table; }
-
-        }
+        private static readonly ResourceManager ResourceManager = new ResourceManager("SQLScrippter.Properties.Resources", typeof(Program).Assembly);
         public static int Main()
         {
-            Configuration config = new Configuration();
-            UpdateType updateType = new UpdateType();
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            IConfiguration configJson = builder.Build();
+            bool criticalErrorIsNecessary = bool.Parse(configJson["AppSettings:criticalErrorIsNecessary"]);
+
+            // установка языка
+            string languageForComments = string.IsNullOrWhiteSpace( configJson["AppSettings:language"]) ? "english":  configJson["AppSettings:language"].ToLower();
+            SetLanguage(languageForComments);
+
+            //все критические ошибки валят библиотеку по умолчанию
+            if (criticalErrorIsNecessary)
+                AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+                {
+                    if (args.ExceptionObject is CriticalException ex)
+                    {
+                        Console.WriteLine(ResourceManager.GetString("CriticalError"));                        
+
+                        //Валим всю прогу
+                        Environment.FailFast(ex.ErrorMessage, ex);
+                    }
+                };
+
+
+            LibraryOFStructs.Configuration config = new LibraryOFStructs.Configuration();
+            LibraryOFStructs.UpdateType updateType = new LibraryOFStructs.UpdateType();
+            PostgreSQLScripter PotgreSricpt = new PostgreSQLScripter();
+
+
             Console.WriteLine("имя функции:");
             string funcName = Console.ReadLine();
             Console.WriteLine("type name:");
@@ -80,7 +59,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
             List<string> updateMappings = new();
             List<string> updateMappingsColumn = new();
             List<string> MappingsConnectionColumn = new();
-            List<Types> uq_Key = new();
+            List<LibraryOFStructs.Types> uq_Key = new();
             bool constraint;
             int i = 0;
             Console.WriteLine("таблица для вставки:");
@@ -108,7 +87,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     type = config.doubles;
                 else if (Console.ReadLine().Contains("i"))
                     type = config.ints;
-
+             
 
                 string foreignTable = "";
                 if (Console.ReadLine().Contains("f"))
@@ -121,7 +100,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 else
                     throw new Exception(" тип не соответсувет возможным");
 
-                uq_Key.Add(new Types(type, key, isId, foreignTable));
+                uq_Key.Add(new LibraryOFStructs.Types(type, key, isId, foreignTable));
             }
 
 
@@ -167,113 +146,18 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     MappingsConnectionColumn.Add("");
                 }
             }
-            Console.WriteLine(Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
-            Console.WriteLine(Upsert("source_temp", result_table, uq_Key, update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn, constraint));
-
+            Console.WriteLine(PotgreSricpt.Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
+            Console.WriteLine(PotgreSricpt.Upsert("source_temp", result_table, uq_Key, update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn, constraint));
+            
             return 0;
         }
-
-        public static string Update(string sourceTable, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn)
+        private static void SetLanguage(string language)
         {
-            UpdateType updateType = new UpdateType();
-            StringBuilder upd = new StringBuilder();
-            for (int i = 0; i < update.Length; i++)
-                if (update[i] != updateType.None)
-                {
-                    if (update[i] != updateType.NoData)
-                        break;
-                    if (update[i] != updateType.Update)
-                        upd.AppendLine($"UPDATE {sourceTable} t \nSET {updateTable[i]}id = s.ID \nFROM {updateTable[i]} s \nWHERE s.{updateColumn[i]} = t.{paramName[i]}name;\n\n");
-                    if (update[i] != updateType.WithDictionary)
-                        upd.AppendLine($"UPDATE {sourceTable} t \nSET {updateTable[i]}id = s.ID \nFROM {updateTable[i]} \nLEFT JOIN {updateMappings[i]} ms \n\tON ms.{MappingsConnectionColumn[i]}=s.id \nWHERE s.{updateColumn[i]} = t.{paramName[i]}name or s.{updateMappingsColumn[i]} = t.{paramName[i]}name;\n\n");
-                }
-            return upd.ToString();
-        }
-        public static string Upsert(string sourceTable, string resulting_table, List<Types> unqiueKey, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn, bool keyIsConstraint)
-        {
-            UpdateType updateType = new UpdateType();
-            StringBuilder upd = new StringBuilder();
-            upd.AppendLine($"INSERT INTO {resulting_table}(\n");
-            for (int i = 0; i < update.Length; i++)
-            {
-                if (update[i] != updateType.NoData)
-                    break;
-                if (update[i] != updateType.Update || update[i] != updateType.WithDictionary)
-                    upd.AppendLine(paramName[i]);
-                else
-                    upd.AppendLine($"{updateTable}id");
-            }
-            upd.AppendLine($"SELECT\n");
-
-            for (int i = 0; i < update.Length; i++)
-            {
-                if (update[i] != updateType.NoData)
-                    break;
-                if (update[i] != updateType.Update || update[i] != updateType.WithDictionary)
-                    upd.AppendLine(paramName[i]);
-                else
-                    upd.AppendLine($"{updateTable}id");
-            }
-            if (keyIsConstraint)
-                upd.AppendLine($"FROM {sourceTable}\nON CONFLICT ON CONSTRAINT({uniqueKey(in unqiueKey, keyIsConstraint, resulting_table,false)})\nDO UPDATE\r\n\tSET");
-            else
-                upd.AppendLine($"FROM {sourceTable}\nON CONFLICT({uniqueKey(in unqiueKey, keyIsConstraint, resulting_table, false)})\nDO UPDATE\r\n\tSET");
-
-            for (int i = 0; i < update.Length; i++)
-            {
-                if (update[i] != updateType.NoData)
-                    break;
-                if (update[i] != updateType.Update || update[i] != updateType.WithDictionary)
-                    upd.AppendLine($"{paramName[i]} =EXCLUDED.{paramName[i]}");
-                else
-                    upd.AppendLine($"{updateTable}id =EXCLUDED.{updateTable}id");
-            }
-
-
-            return upd.ToString();
+            // Установка культуры для текущего потока
+            var culture = new CultureInfo(language);
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
         }
 
-
-
-        /// <summary>
-        /// Стоит прописать код для определения есть ли уникальный ключ в БД для этой таблицы
-        /// ТАКЖЕ ДОБАВИТЬ СКРИПТЕР ДЛЯ ПЕРЕВОДА ТИПОВ В CONSTRAINT
-        /// </summary>
-        /// <param name="unqiueKey"></param>
-        /// <param name="keyIsConstraint"></param>
-        /// <param name="tableName"></param>
-        /// <param name="script"></param>
-        /// <returns></returns>
-        public static string uniqueKey(in List<Types> unqiueKey, bool keyIsConstraint,string tableName,bool script)
-        {
-            StringBuilder key = new StringBuilder();
-            if (keyIsConstraint)
-                if (script)
-                {
-
-                }
-                else
-                {
-                    foreach (Types type in unqiueKey)
-                    {
-                        key.Append($"{type.Name},");
-                    }
-                }
-            else if (script)
-            {
-                key.Append($"ALTER TABLE {tableName}\r\nADD CONSTRAINT {tableName}_uq UNIQUE (");
-                foreach (Types type in unqiueKey)
-                {
-                    key.Append($"{type.Name},");
-                }
-                key.Append(");");
-            }
-            else if (check_the_key(tableName)) return $"{tableName}_uq"; // ЗАГЛУШКА
-            return "";
-        }
-        public static bool check_the_key(string tableName)
-        {
-            return true;
-        }
     }
 }

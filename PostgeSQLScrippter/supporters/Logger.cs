@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SqlScrippter
+namespace SqlScrippter.supporters
 {
     internal class Logger
     {

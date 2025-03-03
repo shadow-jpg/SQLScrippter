@@ -1,39 +1,36 @@
-﻿using Npgsql;
+﻿using System.Data.SqlClient;
 
-namespace SqlScrippter.connectors
+namespace SqlScrippter.SQL.connectors
 {
-    internal class PostgreSQL
+    internal class TransactSQL
     {
         private readonly string _connectionString;
 
-        // Конструктор класса, принимающий строку подключения
-        public PostgreSQL(string connectionString)
+        public TransactSQL(string connectionString)
         {
             _connectionString = connectionString;
         }
 
-        // Метод для выполнения SQL-запроса без возврата данных (INSERT, UPDATE, DELETE)
         public int ExecuteNonQuery(string sql)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using (var command = new SqlCommand(sql, connection))
                 {
                     return command.ExecuteNonQuery();
                 }
             }
         }
 
-        // Метод для выполнения SQL-запроса с возвратом данных (SELECT)
         public List<Dictionary<string, object>> ExecuteQuery(string sql)
         {
             var result = new List<Dictionary<string, object>>();
 
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using (var command = new SqlCommand(sql, connection))
                 using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
@@ -51,13 +48,12 @@ namespace SqlScrippter.connectors
             return result;
         }
 
-        // Метод для выполнения SQL-запроса с параметрами
         public int ExecuteNonQueryWithParameters(string sql, Dictionary<string, object> parameters)
         {
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using (var command = new SqlCommand(sql, connection))
                 {
                     foreach (var param in parameters)
                     {
@@ -68,15 +64,14 @@ namespace SqlScrippter.connectors
             }
         }
 
-        // Метод для выполнения SQL-запроса с параметрами и возвратом данных
         public List<Dictionary<string, object>> ExecuteQueryWithParameters(string sql, Dictionary<string, object> parameters)
         {
             var result = new List<Dictionary<string, object>>();
 
-            using (var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using (var command = new SqlCommand(sql, connection))
                 {
                     foreach (var param in parameters)
                     {

@@ -2,9 +2,44 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.2" />    
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.2" />
+    <PackageReference Include="MySql.Data" Version="9.2.0" />
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="properties\Resources.portuguese.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.portuguese.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="properties\Resources.portuguese.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.portuguese.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>
