@@ -15,7 +15,7 @@ namespace SqlScrippter.supporters
         {
             var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+            .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
             IConfiguration config = builder.Build();
 
             int.TryParse(config["AppSettings:SearchDepth"], out depth); 
