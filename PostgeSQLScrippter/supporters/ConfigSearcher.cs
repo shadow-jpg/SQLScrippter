@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SqlScrippter.Exceptions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("XunitTesting")]
 namespace SqlScrippter.supporters
 {
     internal class ConfigSearcher
