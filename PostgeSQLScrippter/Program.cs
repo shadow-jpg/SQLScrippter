@@ -14,12 +14,15 @@ namespace MyApp // Note: actual namespace depends on the project name.
     class Program
     {
         private static readonly ResourceManager ResourceManager = new ResourceManager("SQLScrippter.Properties.Resources", typeof(Program).Assembly);
+
         public static int Main()
         {
+            Console.WriteLine(Directory.GetCurrentDirectory());
             var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-            IConfiguration configJson = builder.Build();
+            .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
+            IConfiguration configJson = builder.Build(); 
+            var appSettings = configJson.GetSection("AppSettings"); 
             if (!bool.TryParse(configJson["AppSettings:criticalErrorIsNecessary"], out bool criticalErrorIsNecessary))
             {
                 #if DEBUG

@@ -4,7 +4,7 @@
     {
 
         public DateTime ErrorTime { get; } = DateTime.UtcNow;
-        public virtual int ErrorCode { get; }
+        public virtual string ErrorCode { get; } = "OrmCritical:0";
 
         public virtual string ErrorMessage { get; } = "Application terminated due to a critical error.";
 

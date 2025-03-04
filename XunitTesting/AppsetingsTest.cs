@@ -1,12 +1,64 @@
 ﻿using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using SqlScrippter.supporters;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 namespace XunitTesting
 {
     public class AppsetingsTest
     {
         public string configPattern = "config.json";
 
+        [Fact]
+        public void AppSettingsSection_Exists()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
+            IConfiguration config = builder.Build();
+            var appSettings = config.GetSection("AppSettings");
+
+            Assert.True(appSettings.Exists() && appSettings.GetChildren().Any(), "Секция 'AppSettings' не найдена или пуста.");
+        }
+
+        [Theory]
+        [InlineData("SearchDepth","int")]
+        [InlineData("configure", "string")]
+        [InlineData("criticalErrorIsNecessary", "bool")]
+        [InlineData("language", "string")]
+        public void TestInnerConfigure(string key, string expectedType)
+        {
+            var builder = new ConfigurationBuilder()
+                            .SetBasePath(Directory.GetCurrentDirectory())
+                            .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
+            IConfiguration config = builder.Build();
+            var appSettings = config.GetSection("AppSettings");
+            if (appSettings.Exists())
+            {
+                var value = appSettings[key];
+                //Assert.True(!string.IsNullOrWhiteSpace(value), $"Значение для ключа '{key}' отсутствует или пустое.");
+
+                switch (expectedType.ToLower())
+                {
+                    case "int":
+                        Assert.True(int.TryParse(value, out _), $"Значение для ключа '{key}' не является целым числом.");
+                        break;
+                    case "bool":
+                        Assert.True(bool.TryParse(value, out _), $"Значение для ключа '{key}' не является булевым значением.");
+                        break;
+                    case "string":
+                        break;
+                    default:
+                        throw new ArgumentException($"Неизвестный тип данных: {expectedType}");
+                }
+            }
+            else
+            {
+                // Если секция AppSettings не существует, тест должен провалиться
+                Assert.True(false, "Секция 'AppSettings' не найдена в конфигурации.");
+            }
+        }
+   
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -14,7 +66,7 @@ namespace XunitTesting
         [InlineData(3)]
         [InlineData(4)]
         [InlineData(5)]
-        public void Test1(int value)
+        public void TestFindUsersConfigure(int value)
         {
             string file =prepare(value);
             ConfigSearcher configSearcher = new ConfigSearcher();

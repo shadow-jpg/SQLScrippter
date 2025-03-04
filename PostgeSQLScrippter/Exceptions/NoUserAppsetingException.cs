@@ -3,6 +3,7 @@
     class NoUserAppsetingException : CriticalException
     {
         public override string ErrorMessage { get; } = "File with user configuration not found!";
+        public virtual string ErrorCode { get; } = "OrmCritical:NoFile1";
         int depth;
 
         public NoUserAppsetingException() : base()

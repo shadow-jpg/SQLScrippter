@@ -1,8 +1,10 @@
 {
   "AppSettings": {
-    "SearchDepth": 4,
+    "SearchDepth": "4",
     "configure": "",
-    "criticalErrorIsNecessary": true,
+    "criticalErrorIsNecessary": "true",
     "language": "Russian"
+  },
+  "AppSettings2": {
   }
 }
