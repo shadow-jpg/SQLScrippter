@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text;
+using BenchmarkDotNet.Running;
 using Microsoft.Extensions.Configuration;
 using MySqlX.XDevAPI.Common;
 using SqlScrippter.supporters;
@@ -72,9 +73,11 @@ namespace XunitTesting
         {
             string file =prepareUserConfigure(value);
             ConfigSearcher configSearcher = new ConfigSearcher();
-            string result = configSearcher.FindConfigFiles();
-            Assert.True(result == file, $"Test not Found Users Configure resullt: {result} ,file {file}");
+            string result = configSearcher.FindConfigFiles(LibAppsetings.getConfigurePattern());
+            Assert.True(result == file, $"Test not Found Users Configure resullt: {result} ,\nfile {file}");
         }
+
+
         /// <summary>
         /// 0 - берет вложенную директорию
         /// 1 - берет директорию родитель

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using BenchmarkDotNet.Attributes;
+using Microsoft.Extensions.Configuration;
 using SqlScrippter.Exceptions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -18,16 +19,18 @@ namespace SqlScrippter.supporters
             .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
             IConfiguration config = builder.Build();
 
-            int.TryParse(config["AppSettings:SearchDepth"], out depth); 
+            int.TryParse(config[$"{LibAppsetings.getPosition()}:SearchDepth"], out depth); 
 
-            FindConfigFiles();
+            FindConfigFiles(LibAppsetings.getConfigurePattern());
         }
         public ConfigSearcher(IConfiguration config)
         {
-            int depth = int.Parse(config["AppSettings:SearchDepth"]);
-            FindConfigFiles();
+            int depth = int.Parse(config[$"{LibAppsetings.getPosition()}:SearchDepth"]);
+            FindConfigFiles(LibAppsetings.getConfigurePattern());
         }
-        public string FindConfigFiles(string searchPattern = "config.*")
+
+
+        public string FindConfigFiles(string searchPattern )
         {
             for (int i = 0; i < depth; i++)
             {
@@ -46,14 +49,18 @@ namespace SqlScrippter.supporters
             throw new NoUserAppsetingException(depth);
         }
 
+
         private bool SearchDirectory(string directoryPath, string searchPattern, string checkedFile)
         {
             try
             {
-                foreach (var file in Directory.GetFiles(directoryPath, searchPattern))
+                foreach (var file in Directory.GetFiles(directoryPath, LibAppsetings.getSection()))
                 {
-                    configFile = file;
-                    return true;
+                    if (ContainsRequiredSection(file, "AppSettings"))
+                    {
+                        configFile = file;
+                        return true;
+                    }
                 }
 
                 foreach (var subDirectory in Directory.GetDirectories(directoryPath))
@@ -72,6 +79,27 @@ namespace SqlScrippter.supporters
             }
 
             return false;
+        }
+
+        private bool ContainsRequiredSection(string filePath, string sectionName ="Orm")
+        {
+            try
+            {
+                var builder = new ConfigurationBuilder()
+                    .SetBasePath(Path.GetDirectoryName(filePath))
+                    .AddJsonFile(Path.GetFileName(filePath), optional: true, reloadOnChange: true);
+
+                IConfiguration config = builder.Build();
+
+
+                var section = config.GetSection(sectionName);
+                return section.Exists() && section.GetChildren().Any();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при загрузке конфигурации из файла {filePath}: {ex.Message}");
+                return false;
+            }
         }
     }
 }

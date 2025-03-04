@@ -3,7 +3,8 @@
 Net 9.0
 PostgreSQL
 XUnit
-
+NSubstitute(Пока не используется)
+BenchMark(Пока не используется)
 
 
 Основа Скриптера/ORM для языка postgresql

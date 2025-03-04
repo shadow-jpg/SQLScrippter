@@ -12,23 +12,34 @@ namespace SqlScrippter.supporters
         {
 
         }
-        public LibAppsetings(int SearchDepth, string configure, bool criticalErrorIsNecessary, string language)
+        public LibAppsetings(int SearchDepth, string configure, bool criticalErrorIsNecessary, string language,string configurePattern)
         {
             LibAppsetings.SearchDepth = SearchDepth;
             LibAppsetings.configure = configure;
+            LibAppsetings.configurePattern = configurePattern;
             LibAppsetings.criticalErrorIsNecessary = criticalErrorIsNecessary;
             LibAppsetings.language = language;
         }
-        private string Position = "AppSettings";
+        private static string Position = "AppSettings";
+        private static string Section = "Orm";
 
         private static int SearchDepth  = 4;
         private static string configure  = String.Empty;
+        private static string configurePattern = "config.*";
         private static bool criticalErrorIsNecessary = true;
         private static string language = String.Empty;
 
-        public string getPosition()
+        public static string getPosition()
         {
             return Position;
+        }
+        public static string getSection()
+        {
+            return Section;
+        }
+        public static string getConfigurePattern()
+        {
+            return configurePattern;
         }
     }
     struct AppsetingUser
