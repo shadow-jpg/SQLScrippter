@@ -61,11 +61,29 @@ namespace SqlScrippter.properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Обнаружена необработанная критическая ошибка в ORM. Завершение работы приложения....
+        ///   Ищет локализованную строку, похожую на An unhandled critical error has been detected in the ORM. Shutting down the application....
         /// </summary>
         internal static string CriticalError {
             get {
                 return ResourceManager.GetString("CriticalError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на .
+        /// </summary>
+        internal static string LibAppsetingNotFound {
+            get {
+                return ResourceManager.GetString("LibAppsetingNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на File with users configuration not found!.
+        /// </summary>
+        internal static string UserAppsetingNotFOund {
+            get {
+                return ResourceManager.GetString("UserAppsetingNotFOund", resourceCulture);
             }
         }
     }

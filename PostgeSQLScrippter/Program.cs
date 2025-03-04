@@ -2,12 +2,14 @@
 using SqlScrippter.Exceptions;
 using SqlScrippter.SQL;
 using SqlScrippter.SQL.scriptures;
+using System.Diagnostics;
 using System.Globalization;
 using System.Resources;
 namespace MyApp // Note: actual namespace depends on the project name.
 {
     /// <summary>
     /// criticalErrorIsNecessary = true because handling  for fatal errors of ORM
+    /// lanuages accaptable for errors  English(main), Spanish, Portuguese, Russian,German
     /// </summary>
     class Program
     {
@@ -20,9 +22,12 @@ namespace MyApp // Note: actual namespace depends on the project name.
             IConfiguration configJson = builder.Build();
             if (!bool.TryParse(configJson["AppSettings:criticalErrorIsNecessary"], out bool criticalErrorIsNecessary))
             {
+                #if DEBUG
+                var st = new StackTrace(true);
                 var frame = st.GetFrame(0);
-                int line = frame.GetFileLineNumber();
+                int line = frame.GetFileLineNumber()-2;
                 Console.WriteLine(ResourceManager.GetString("NoDataInJSON") + "main class. line:" + line);
+                #endif
             }
 
             // установка языка

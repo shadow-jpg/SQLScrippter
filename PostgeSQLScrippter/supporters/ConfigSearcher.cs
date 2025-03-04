@@ -40,7 +40,7 @@ namespace SqlScrippter.supporters
                 if (SearchDirectory(configFile, searchPattern, checkedFile))
                     return configFile;
             }
-            throw new NoAppsetingException(depth);
+            throw new NoUserAppsetingException(depth);
         }
 
         private bool SearchDirectory(string directoryPath, string searchPattern, string checkedFile)
