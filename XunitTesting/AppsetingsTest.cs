@@ -19,7 +19,7 @@ namespace XunitTesting
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
             IConfiguration config = builder.Build();
-            var appSettings = config.GetSection("AppSettings");
+            var appSettings = config.GetSection(LibAppsetings.getPosition());
 
             Assert.True(appSettings.Exists() && appSettings.GetChildren().Any(), "Секция 'AppSettings' не найдена или пуста.");
         }
@@ -61,7 +61,9 @@ namespace XunitTesting
                 Assert.True(false, "Секция 'AppSettings' не найдена в конфигурации.");
             }
         }
-   
+
+       
+
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -110,7 +112,7 @@ namespace XunitTesting
             }
             using (FileStream fs = File.Create($"{configFile}\\{configPattern}"))
             {
-                byte[] info = new UTF8Encoding(true).GetBytes("language:Postgresql; port =5432; username =admin");
+                byte[] info = new UTF8Encoding(true).GetBytes("\"Orm\":{\"language\":\"Postgresql\", \"port\" =5432, \"username =\"admin\"}");
                 fs.Write(info, 0, info.Length);
             }
             return $"{configFile}\\{configPattern}";

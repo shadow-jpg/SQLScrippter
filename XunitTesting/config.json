@@ -1,1 +1,1 @@
-language:Postgresql; port =5432; username =admin
+"Orm":{"language":"Postgresql", "port" =5432, "username ="admin"}

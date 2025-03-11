@@ -11,9 +11,12 @@ namespace SqlScrippter.supporters
     {
         private string configFile = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private int depth;
-        private string checkedFile;
-        public ConfigSearcher()
+        private string checkedFile; 
+        private string sectionName;
+        public ConfigSearcher(string sectionName = "Orm")
         {
+            this.sectionName = sectionName;
+
             var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
@@ -23,8 +26,9 @@ namespace SqlScrippter.supporters
 
             FindConfigFiles(LibAppsetings.getConfigurePattern());
         }
-        public ConfigSearcher(IConfiguration config)
+        public ConfigSearcher(IConfiguration config, string sectionName = "Orm")
         {
+            this.sectionName = sectionName;
             int depth = int.Parse(config[$"{LibAppsetings.getPosition()}:SearchDepth"]);
             FindConfigFiles(LibAppsetings.getConfigurePattern());
         }
@@ -58,7 +62,8 @@ namespace SqlScrippter.supporters
                 {
                     if (ContainsRequiredSection(file, "AppSettings"))
                     {
-                        configFile = file;
+                        if (ContainsRequiredSection(file, sectionName))
+                            configFile = file;
                         return true;
                     }
                 }
@@ -81,7 +86,9 @@ namespace SqlScrippter.supporters
             return false;
         }
 
-        private bool ContainsRequiredSection(string filePath, string sectionName ="Orm")
+
+
+        private bool ContainsRequiredSection(string filePath, string sectionName)
         {
             try
             {
@@ -91,15 +98,26 @@ namespace SqlScrippter.supporters
 
                 IConfiguration config = builder.Build();
 
-
-                var section = config.GetSection(sectionName);
-                return section.Exists() && section.GetChildren().Any();
+                return FindSectionRecursive(config, sectionName);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при загрузке конфигурации из файла {filePath}: {ex.Message}");
                 return false;
             }
+        }
+
+        private bool FindSectionRecursive(IConfiguration config, string sectionName)
+        {
+            var section = config.GetSection(sectionName);
+            if (section.Exists() && section.GetChildren().Any())
+                return true;
+
+            foreach (var child in config.GetChildren())
+                if (FindSectionRecursive(child, sectionName))
+                    return true;
+
+            return false;
         }
     }
 }

@@ -1,11 +1,13 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 
+[assembly: InternalsVisibleTo("XunitTesting")]
 namespace SqlScrippter.SQL.scriptures
 {
-    internal class PostgreSQLScripter
+    internal class PostgreSQLScripter:SQLScripture
     {
         public PostgreSQLScripter() { }
-        public string Update(string sourceTable, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn)
+        public override string Update(string sourceTable, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn)
         {
             LibraryOFStructs.UpdateType updateType = new LibraryOFStructs.UpdateType();
             StringBuilder upd = new StringBuilder();
@@ -21,7 +23,7 @@ namespace SqlScrippter.SQL.scriptures
                 }
             return upd.ToString();
         }
-        public string Upsert(string sourceTable, string resulting_table, List<LibraryOFStructs.Types> unqiueKey, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn, bool keyIsConstraint)
+        public override string Upsert(string sourceTable, string resulting_table, List<LibraryOFStructs.Types> unqiueKey, int[] update, List<string> paramName, List<string> updateTable, List<string> updateColumn, List<string> updateMappings, List<string> updateMappingsColumn, List<string> MappingsConnectionColumn, bool keyIsConstraint)
         {
             LibraryOFStructs.UpdateType updateType = new LibraryOFStructs.UpdateType();
             StringBuilder upd = new StringBuilder();
@@ -76,7 +78,7 @@ namespace SqlScrippter.SQL.scriptures
         /// <param name="tableName"></param>
         /// <param name="script"></param>
         /// <returns></returns>
-        public static string uniqueKey(in List<LibraryOFStructs.Types> unqiueKey, bool keyIsConstraint, string tableName, bool script)
+        public override string uniqueKey(in List<LibraryOFStructs.Types> unqiueKey, bool keyIsConstraint, string tableName, bool script)
         {
             StringBuilder key = new StringBuilder();
             if (keyIsConstraint)
@@ -103,7 +105,7 @@ namespace SqlScrippter.SQL.scriptures
             else if (check_the_key(tableName)) return $"{tableName}_uq"; // ЗАГЛУШКА
             return "";
         }
-        public static bool check_the_key(string tableName)
+        public override bool check_the_key(string tableName)
         {
             return true;
         }
