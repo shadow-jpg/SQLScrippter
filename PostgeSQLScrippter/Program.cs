@@ -9,6 +9,7 @@ using System.Resources;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Extensions.Logging;
+using System.Data;
 
 namespace MyApp // Note: actual namespace depends on the project name.
 {
@@ -98,27 +99,22 @@ namespace MyApp // Note: actual namespace depends on the project name.
             else if (index.Contains("i"))
                 constraint = false;
             else throw new Exception("no i or c included");
-            if (constraint)
-                Console.WriteLine("введите поля входящие в ключ или 0 для завершения ключа:");
-            else
-                Console.WriteLine("введите поля входящие в unique key или 0 для завершения ключа:");
+            ConstraintConsole(constraint);
             string key = Console.ReadLine();
             while (key != "0")
             {
+                string foreignTable = "";
                 string type = "";
                 bool isId = false;
-                Console.WriteLine("тип поля дата d,  дробное f, i for целые, f если это foreign key");
-                string type = Console.ReadLine();
-                if (type.Contains("d"))
+                Console.WriteLine("тип поля дата d,  дробное f, i for целые, k если это foreign key");
+                string typeOfString = Console.ReadLine();
+                if (typeOfString.Contains("d"))
                     type = config.timezones;
-                else if (type.Contains("d"))
+                else if (typeOfString.Contains("d"))
                     type = config.doubles;
-                else if (type.Contains("i"))
+                else if (typeOfString.Contains("i"))
                     type = config.ints;
-
-
-                string foreignTable = "";
-                if (Console.ReadLine().Contains("f"))
+                else if (typeOfString.Contains("k"))
                 {
                     type = config.ids;
                     isId = true;
@@ -129,6 +125,8 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     throw new Exception(" тип не соответсувет возможным");
 
                 uq_Key.Add(new LibraryOFStructs.Types(type, key, isId, foreignTable));
+                ConstraintConsole(constraint);
+                key = Console.ReadLine();
             }
 
 
@@ -195,6 +193,13 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 logger.LogError("ошибка такого языка нет:{lang}", language);
 
             }
+        }
+        public static void ConstraintConsole(bool constraint)
+        {
+            if (constraint)
+                Console.WriteLine("введите поля входящие в ключ или 0 для завершения ключа:");
+            else
+                Console.WriteLine("введите поля входящие в unique key или 0 для завершения ключа:");
         }
 
     }
