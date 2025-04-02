@@ -1,10 +1,15 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using SqlScrippter.Exceptions;
 using SqlScrippter.SQL;
 using SqlScrippter.SQL.scriptures;
 using System.Diagnostics;
 using System.Globalization;
 using System.Resources;
+using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Extensions.Logging;
+
 namespace MyApp // Note: actual namespace depends on the project name.
 {
     /// <summary>
@@ -13,11 +18,21 @@ namespace MyApp // Note: actual namespace depends on the project name.
     /// </summary>
     class Program
     {
+        private static ILogger<Program> logger;
         private static readonly ResourceManager ResourceManager = new ResourceManager("SQLScrippter.Properties.Resources", typeof(Program).Assembly);
 
-        public static int Main()
+        public async static Task Main()
         {
-            Console.WriteLine(Directory.GetCurrentDirectory());
+
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddNLog("nlog.config");
+            });
+
+            logger = loggerFactory.CreateLogger<Program>();
+
+
+            logger.LogInformation(Directory.GetCurrentDirectory());
             var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsetings.json", optional: true, reloadOnChange: true);
@@ -29,7 +44,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 var st = new StackTrace(true);
                 var frame = st.GetFrame(0);
                 int line = frame.GetFileLineNumber()-2;
-                Console.WriteLine(ResourceManager.GetString("NoDataInJSON") + "main class. line:" + line);
+                logger.LogWarning(ResourceManager.GetString("NoDataInJSON") + "main class. line:" + line);
                 #endif
             }
 
@@ -43,7 +58,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 {
                     if (args.ExceptionObject is CriticalException ex)
                     {
-                        Console.WriteLine(ResourceManager.GetString("CriticalError"));
+                        logger.LogError(ResourceManager.GetString("CriticalError"));
 
                         //Валим всю прогу
                         Environment.FailFast(ex.ErrorMessage, ex);
@@ -160,7 +175,7 @@ namespace MyApp // Note: actual namespace depends on the project name.
             Console.WriteLine(PotgreSricpt.Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
             Console.WriteLine(PotgreSricpt.Upsert("source_temp", result_table, uq_Key, update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn, constraint));
 
-            return 0;
+            return;
         }
         private static void SetLanguage(string language)
         {
