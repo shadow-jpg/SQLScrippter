@@ -179,10 +179,20 @@ namespace MyApp // Note: actual namespace depends on the project name.
         }
         private static void SetLanguage(string language)
         {
-            // Установка культуры для текущего потока
-            var culture = new CultureInfo(language);
-            Thread.CurrentThread.CurrentCulture = culture;
-            Thread.CurrentThread.CurrentUICulture = culture;
+            try
+            {
+                CultureInfo current = new CultureInfo(language.ToLower().Substring(0, 2));
+                Thread.CurrentThread.CurrentCulture = current;
+                Thread.CurrentThread.CurrentUICulture = current;
+            }
+            catch(Exception e)
+            {
+                var culture = new CultureInfo("en-EN");
+                Thread.CurrentThread.CurrentCulture = culture;
+                Thread.CurrentThread.CurrentUICulture = culture;
+                logger.LogError("ошибка такого языка нет:{lang}", language);
+
+            }
         }
 
     }
