@@ -92,9 +92,10 @@ namespace MyApp // Note: actual namespace depends on the project name.
             string result_table = Console.ReadLine();
 
             Console.WriteLine("ключ constraint / index: c or i");
-            if (Console.ReadLine().Contains("c"))
+            string index = Console.ReadLine();
+            if (index.Contains("c"))
                 constraint = true;
-            else if (Console.ReadLine().Contains("i"))
+            else if (index.Contains("i"))
                 constraint = false;
             else throw new Exception("no i or c included");
             if (constraint)
@@ -106,12 +107,13 @@ namespace MyApp // Note: actual namespace depends on the project name.
             {
                 string type = "";
                 bool isId = false;
-                Console.WriteLine("тип поля дата d,  дробное d, i for целые, f если это foreign key");
-                if (Console.ReadLine().Contains("d"))
+                Console.WriteLine("тип поля дата d,  дробное f, i for целые, f если это foreign key");
+                string type = Console.ReadLine();
+                if (type.Contains("d"))
                     type = config.timezones;
-                else if (Console.ReadLine().Contains("d"))
+                else if (type.Contains("d"))
                     type = config.doubles;
-                else if (Console.ReadLine().Contains("i"))
+                else if (type.Contains("i"))
                     type = config.ints;
 
 
