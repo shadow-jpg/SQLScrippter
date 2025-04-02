@@ -28,16 +28,23 @@ namespace SqlScrippter.SQL.scriptures
             LibraryOFStructs.UpdateType updateType = new LibraryOFStructs.UpdateType();
             StringBuilder upd = new StringBuilder();
             upd.AppendLine($"INSERT INTO {resulting_table}(\n");
+            for (int i = 0; i < unqiueKey.Count(); i++)
+                if (i != unqiueKey.Count()-1)
+                    upd.AppendLine($"{unqiueKey[i].Name},");
+                else
+                    upd.AppendLine($"{unqiueKey[i].Name}");
+
             for (int i = 0; i < update.Length; i++)
             {
-                if (update[i] != updateType.NoData)
-                    break;
+                upd.AppendLine(",");
+                //if (update[i] != updateType.NoData)
+                //    break;
                 if (update[i] != updateType.Update || update[i] != updateType.WithDictionary)
                     upd.AppendLine(paramName[i]);
                 else
                     upd.AppendLine($"{updateTable}id");
             }
-            upd.AppendLine($"SELECT\n");
+            upd.AppendLine($")\nSELECT\n");
 
             for (int i = 0; i < update.Length; i++)
             {

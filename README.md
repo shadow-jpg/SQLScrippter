@@ -56,3 +56,35 @@ PostgreSQL:
 Добавить MySql
 Добавить T-SQL
 АЛГОРИТМ МИГРАЦИИ
+
+
+
+нынешний пример вывода:
+UPDATE source_temp t
+SET recallid = s.ID
+FROM recall s
+WHERE s.lowName = t.lowname;
+
+
+UPDATE source_temp t
+SET recallid = s.ID
+FROM recall
+LEFT JOIN strat ms
+        ON ms.recallId=s.id
+WHERE s.lowName = t.lowname or s.Naming = t.lowname;
+
+
+
+INSERT INTO awaw(
+recallid,
+gtp
+)
+SELECT
+recallid,
+gtp
+FROM source_temp
+ON CONFLICT ON CONSTRAINT()
+DO UPDATE
+        SET
+gtp =EXCLUDED.gtp
+recallid =EXCLUDED.recallid

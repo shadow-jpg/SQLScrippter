@@ -108,13 +108,13 @@ namespace MyApp // Note: actual namespace depends on the project name.
                 bool isId = false;
                 Console.WriteLine("тип поля дата d,  дробное f, i for целые, k если это foreign key");
                 string typeOfString = Console.ReadLine();
-                if (typeOfString.Contains("d"))
+                if (typeOfString.ToLower().Contains("d"))
                     type = config.timezones;
-                else if (typeOfString.Contains("d"))
+                else if (typeOfString.ToLower().Contains("f"))
                     type = config.doubles;
-                else if (typeOfString.Contains("i"))
+                else if (typeOfString.ToLower().Contains("i"))
                     type = config.ints;
-                else if (typeOfString.Contains("k"))
+                else if (typeOfString.ToLower().Contains("k"))
                 {
                     type = config.ids;
                     isId = true;
@@ -172,7 +172,8 @@ namespace MyApp // Note: actual namespace depends on the project name.
                     MappingsConnectionColumn.Add("");
                 }
             }
-            Console.WriteLine(PotgreSricpt.Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
+            if (updateTable.Count != 0)
+                Console.WriteLine(PotgreSricpt.Update("source_temp", update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn));
             Console.WriteLine(PotgreSricpt.Upsert("source_temp", result_table, uq_Key, update, paramName, updateTable, updateColumn, updateMappings, updateMappingsColumn, MappingsConnectionColumn, constraint));
 
             return;
