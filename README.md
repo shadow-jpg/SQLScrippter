@@ -5,6 +5,7 @@ PostgreSQL
 XUnit
 NSubstitute(Пока не используется)
 BenchMark(Пока не используется)
+NLog(временно пока не переведено в библиотеку)
 
 
 Основа Скриптера/ORM для языка postgresql
