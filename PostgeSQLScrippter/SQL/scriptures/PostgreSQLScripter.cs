@@ -37,8 +37,8 @@ namespace SqlScrippter.SQL.scriptures
             for (int i = 0; i < update.Length; i++)
             {
                 upd.AppendLine(",");
-                //if (update[i] != updateType.NoData)
-                //    break;
+                if (update[i] != updateType.NoData)
+                    break;
                 if (update[i] != updateType.Update || update[i] != updateType.WithDictionary)
                     upd.AppendLine(paramName[i]);
                 else
